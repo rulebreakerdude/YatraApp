@@ -7,7 +7,7 @@ import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-@Database(entities = {Trainee.class}, version = 1)
+@Database(entities = {Trainee.class}, version = 2)
 public abstract class TraineeDatabase extends RoomDatabase {
 
     public abstract TraineeDao traineeDao();
@@ -20,6 +20,7 @@ public abstract class TraineeDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                             TraineeDatabase.class, "trainee_database")
+                            .fallbackToDestructiveMigration()
                             .build();
                 }
             }

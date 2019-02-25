@@ -14,14 +14,20 @@ public class TraineeListAdapter extends RecyclerView.Adapter<TraineeListAdapter.
 
     class TraineeViewHolder extends RecyclerView.ViewHolder {
         private final TextView traineeItemView;
+        private final TextView traineeNameView;
+        private final TextView trainerNumberView;
+        private final TextView trainerNameView;
         private final TextView traineeDateTime;
         private final CheckBox traineeSyncedView;
 
         private TraineeViewHolder(View itemView) {
             super(itemView);
             traineeItemView = itemView.findViewById(R.id.textView);
-            traineeDateTime =itemView.findViewById(R.id.textView2);
+            traineeNameView=itemView.findViewById(R.id.textView2);
+            traineeDateTime =itemView.findViewById(R.id.textView3);
             traineeSyncedView=itemView.findViewById(R.id.checkBox2);
+            trainerNumberView=itemView.findViewById(R.id.textView4);
+            trainerNameView=itemView.findViewById(R.id.textView5);
         }
     }
 
@@ -41,6 +47,9 @@ public class TraineeListAdapter extends RecyclerView.Adapter<TraineeListAdapter.
         if (mTrainees != null) {
             Trainee current = mTrainees.get(position);
             holder.traineeItemView.setText(current.getTraineeNumber());
+            holder.traineeNameView.setText(current.getTraineeName());
+            holder.trainerNumberView.setText(current.getTrainerNumber());
+            holder.trainerNameView.setText(current.getTrainerName());
             holder.traineeDateTime.setText(current.getDateTime());
             if(current.getIsSynced()==1){
                 holder.traineeSyncedView.setChecked(true);

@@ -13,6 +13,15 @@ public class Trainee {
     @ColumnInfo(name = "trainee_number")
     private String traineeNumber;
 
+    @ColumnInfo(name = "trainee_name")
+    private String traineeName;
+
+    @ColumnInfo(name = "trainer_name")
+    private String trainerName;
+
+    @ColumnInfo(name = "trainer_number")
+    private String trainerNumber;
+
     @ColumnInfo(name = "is_synced")
     private int isSynced;
 
@@ -41,5 +50,29 @@ public class Trainee {
 
     public void setDateTime(String dateTime) {
         this.dateTime = dateTime;
+    }
+
+    public String getTraineeName() {
+        return traineeName;
+    }
+
+    public void setTraineeName(String traineeName) {
+        this.traineeName = traineeName;
+    }
+
+    public String getTrainerName() {
+        return trainerName;
+    }
+
+    public void setTrainerName(String trainerName) {
+        this.trainerName = trainerName;
+    }
+
+    public String getTrainerNumber() {
+        return trainerNumber;
+    }
+
+    public void setTrainerNumber(String trainerNumber) {
+        this.trainerNumber = trainerNumber;
     }
 }

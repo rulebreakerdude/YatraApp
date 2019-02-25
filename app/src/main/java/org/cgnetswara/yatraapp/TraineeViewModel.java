@@ -23,5 +23,6 @@ public class TraineeViewModel extends AndroidViewModel {
     public void insert(Trainee trainee) { mRepository.insert(trainee); }
     public void deleteAll() { mRepository.deleteAll(); }
     public void updateSyncStatus(String receiver) { mRepository.updateSyncStatus(receiver); }
+    public void deleteAnEntry(String traineeToBeDeleted) { mRepository.deleteAnEntry(traineeToBeDeleted); }
     public List<Trainee> getAllTraineesAsList(){ return mRepository.getAllTraineesAsList(); }
 }

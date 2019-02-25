@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private TraineeListAdapter traineeListAdapter;
     private RecyclerView recyclerView;
     private EditText senderNumber;
+    private EditText senderName;
     List<Trainee> traineeRealList;
     SharedPreferences sp;
     public static final String MyPREFERENCES = "MyPrefs" ;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         senderNumber=findViewById(R.id.editText);
+        senderName=findViewById(R.id.editText4);
         sp = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
         if(sp.contains(getString(R.string.sender_number))){
             String temp=sp.getString("sender_number","DNE");
@@ -77,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
         final Handler mHandler=new Handler();
 
         Runnable runnable = new Runnable() {
@@ -88,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         mHandler.post(runnable);
+
     }
 
     public void onChoose(View view) {
@@ -118,14 +122,14 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < traineeRealList.size(); i++) {
                 trainee = traineeRealList.get(i);
                 if(trainee.getIsSynced()==0){
-                    sendVolleyRequestToServer(trainee.getTraineeNumber(),trainee.getDateTime());
+                    sendVolleyRequestToServer(trainee.getTraineeNumber(),trainee.getTraineeName(),trainee.getDateTime());
                 }
             }
         } catch (NullPointerException e)
         {e.printStackTrace();}
     }
 
-    public void sendVolleyRequestToServer(final String receiverNumber, final String dateTime){
+    public void sendVolleyRequestToServer(final String receiverNumber,final String receiverName, final String dateTime){
         requestQueue = Volley.newRequestQueue(this);
 
         String url = getString(R.string.base_url) + "yatradata";
@@ -148,8 +152,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<String, String>();
+                Log.e("Look at this",receiverName+"    "+senderName.getText().toString());
                 params.put("sender_number", senderNumber.getText().toString());
+                params.put("sender_name", senderName.getText().toString());
                 params.put("receiver_number", receiverNumber);
+                params.put("receiver_name", receiverName);
                 params.put("datetime",dateTime);
                 return params;
             }
@@ -160,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void addTrainee(View view) {
         EditText traineeNumber=findViewById(R.id.editText2);
+        EditText traineeName=findViewById(R.id.editText3);
         if(traineeNumber.length()!=10){
             traineeNumber.setError("कृपया 10 अंकों का फोन नंबर दर्ज करें !");
         }
@@ -170,6 +178,9 @@ public class MainActivity extends AppCompatActivity {
             DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
             Trainee trainee = new Trainee();
             trainee.setTraineeNumber(traineeNumber.getText().toString());
+            trainee.setTraineeName(traineeName.getText().toString());
+            trainee.setTrainerNumber(senderNumber.getText().toString());
+            trainee.setTrainerName(senderName.getText().toString());
             Date date = Calendar.getInstance().getTime();
             trainee.setDateTime(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(date));
             trainee.setIsSynced(0);
@@ -185,4 +196,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void deleteTrainee(View view) {
+
+    }
 }

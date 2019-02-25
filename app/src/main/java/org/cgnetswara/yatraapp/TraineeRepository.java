@@ -62,6 +62,26 @@ public class TraineeRepository {
     }
 
 
+    public void deleteAnEntry(String traineeToBeDeleted){
+        new deleteAnEntryAsyncTask(mTraineeDao).execute(traineeToBeDeleted);
+    }
+
+    private static class deleteAnEntryAsyncTask extends AsyncTask<String, Void, Void> {
+
+        private TraineeDao mAsyncTaskDao;
+
+        deleteAnEntryAsyncTask(TraineeDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final String... params) {
+            mAsyncTaskDao.deleteAnEntry(params[0]);
+            return null;
+        }
+    }
+
+
     public void insert (Trainee trainee) {
         new insertAsyncTask(mTraineeDao).execute(trainee);
     }
