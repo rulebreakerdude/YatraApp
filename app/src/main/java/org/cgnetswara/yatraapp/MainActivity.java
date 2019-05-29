@@ -15,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -28,6 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,21 +48,30 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences sp;
     public static final String MyPREFERENCES = "MyPrefs" ;
     public static final String REQUESTTAG = "requesttag";
+    public static final String REQUESTTAG2 = "requesttag2";
     RequestQueue requestQueue;
     StringRequest stringRequest;
+    StringRequest stringRequest2;
+    TextView answeredCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        requestQueue = Volley.newRequestQueue(this);
+        answeredCount = findViewById(R.id.textView6);
+        answeredCount.setText("Loading Count...");
 
         senderNumber=findViewById(R.id.editText);
         senderName=findViewById(R.id.editText4);
         sp = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
-        if(sp.contains(getString(R.string.sender_number))){
+        if(sp.contains(getString(R.string.sender_number)) && sp.contains(getString(R.string.sender_name))){
             String temp=sp.getString("sender_number","DNE");
             senderNumber.setText(temp);
             senderNumber.setEnabled(false);
+            String temp2=sp.getString("sender_name","DNE");
+            senderName.setText(temp2);
+            senderName.setEnabled(false);
         }
         else{
             onChoose();
@@ -76,10 +87,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChanged(@Nullable List<Trainee> traineeList) {
                 traineeListAdapter.setTrainees(traineeList);
+                //Checking count here
+                checkAnsweredStatus(traineeList);
             }
         });
-
-
         final Handler mHandler=new Handler();
 
         Runnable runnable = new Runnable() {
@@ -91,8 +102,8 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         mHandler.post(runnable);
-
     }
+
 
     public void onChoose(View view) {
         onChoose();
@@ -110,9 +121,19 @@ public class MainActivity extends AppCompatActivity {
                 editor.apply();
             }
         }
+        if(senderName.isEnabled()){
+            if(senderName.length()== 0) {
+                senderName.setError("कृपया उचित नाम भरें !");
+            }
+            else{
+                senderName.setEnabled(false);
+                editor.putString(getString(R.string.sender_name),senderName.getText().toString());
+                editor.apply();
+            }
+        }
         else{
             senderNumber.setEnabled(true);
-
+            senderName.setEnabled(true);
         }
     }
 
@@ -129,9 +150,61 @@ public class MainActivity extends AppCompatActivity {
         {e.printStackTrace();}
     }
 
-    public void sendVolleyRequestToServer(final String receiverNumber,final String receiverName, final String dateTime){
-        requestQueue = Volley.newRequestQueue(this);
+    private void checkAnsweredStatus(List<Trainee> traineeRealList) {
+        Trainee trainee;
+        int count;
+        try {
+            count = traineeRealList.size();
+        }
+        catch(NullPointerException e){
+            count=0;
+            e.printStackTrace();
+        }
+        try {
+            for (int i = 0; i < traineeRealList.size(); i++) {
+                trainee = traineeRealList.get(i);
+                Log.d("count", ""+count);
+                if(trainee.getIsAnswered()==0){
+                    count=count-1;
+                    sendVolleyRequestToServer_AnsweredStatus(trainee.getTraineeNumber());
+                }
+            }
+        } catch (NullPointerException e)
+        {e.printStackTrace();}
+        String displayCount="People Called: "+count;
+        answeredCount.setText(displayCount);
+    }
 
+    private void sendVolleyRequestToServer_AnsweredStatus(final String receiverNumber) {
+        String url = getString(R.string.base_url) + "yatraAnsweredData";
+
+        stringRequest2 = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if(response.equals("Done!")){
+                            mTraineeViewModel.updateAnsweredStatus(receiverNumber);
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                //Toast.makeText(getBaseContext(), "Network Error", Toast.LENGTH_LONG).show();
+
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("receiver_number", "0"+receiverNumber);
+                return params;
+            }
+        };
+        stringRequest2.setTag(REQUESTTAG2);
+        requestQueue.add(stringRequest2);
+    }
+
+    public void sendVolleyRequestToServer(final String receiverNumber,final String receiverName, final String dateTime){
         String url = getString(R.string.base_url) + "yatradata";
 
         stringRequest = new StringRequest(Request.Method.POST, url,
@@ -145,14 +218,13 @@ public class MainActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getBaseContext(), "Network Error", Toast.LENGTH_LONG).show();
+                //Toast.makeText(getBaseContext(), "Network Error", Toast.LENGTH_LONG).show();
 
             }
         }) {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<String, String>();
-                Log.e("Look at this",receiverName+"    "+senderName.getText().toString());
                 params.put("sender_number", senderNumber.getText().toString());
                 params.put("sender_name", senderName.getText().toString());
                 params.put("receiver_number", receiverNumber);
@@ -181,10 +253,15 @@ public class MainActivity extends AppCompatActivity {
             trainee.setTraineeName(traineeName.getText().toString());
             trainee.setTrainerNumber(senderNumber.getText().toString());
             trainee.setTrainerName(senderName.getText().toString());
-            Date date = Calendar.getInstance().getTime();
-            trainee.setDateTime(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(date));
+            String pattern = "yyyy-MM-dd hh:mm:ss";
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+            String date = simpleDateFormat.format(new Date());
+            trainee.setDateTime(date);
             trainee.setIsSynced(0);
             mTraineeViewModel.insert(trainee);
+            //Clearing the textboxes post receiving input
+            traineeNumber.getText().clear();
+            traineeName.getText().clear();
         }
     }
 
@@ -193,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         if (requestQueue != null) {
             requestQueue.cancelAll(REQUESTTAG);
+            requestQueue.cancelAll(REQUESTTAG2);
         }
     }
 

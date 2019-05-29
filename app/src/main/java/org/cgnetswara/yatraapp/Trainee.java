@@ -25,6 +25,9 @@ public class Trainee {
     @ColumnInfo(name = "is_synced")
     private int isSynced;
 
+    @ColumnInfo(name = "is_answered")
+    private int isAnswered;
+
     @ColumnInfo(name = "datetime")
     private String dateTime;
 
@@ -74,5 +77,13 @@ public class Trainee {
 
     public void setTrainerNumber(String trainerNumber) {
         this.trainerNumber = trainerNumber;
+    }
+
+    public int getIsAnswered() {
+        return isAnswered;
+    }
+
+    public void setIsAnswered(int isAnswered) {
+        this.isAnswered = isAnswered;
     }
 }

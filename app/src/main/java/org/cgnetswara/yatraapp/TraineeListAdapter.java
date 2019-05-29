@@ -1,11 +1,14 @@
 package org.cgnetswara.yatraapp;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
@@ -19,6 +22,7 @@ public class TraineeListAdapter extends RecyclerView.Adapter<TraineeListAdapter.
         private final TextView trainerNameView;
         private final TextView traineeDateTime;
         private final CheckBox traineeSyncedView;
+        private final LinearLayout traineeLinearLayout;
 
         private TraineeViewHolder(View itemView) {
             super(itemView);
@@ -28,6 +32,7 @@ public class TraineeListAdapter extends RecyclerView.Adapter<TraineeListAdapter.
             traineeSyncedView=itemView.findViewById(R.id.checkBox2);
             trainerNumberView=itemView.findViewById(R.id.textView4);
             trainerNameView=itemView.findViewById(R.id.textView5);
+            traineeLinearLayout=itemView.findViewById(R.id.linearLayoutContainer);
         }
     }
 
@@ -57,11 +62,18 @@ public class TraineeListAdapter extends RecyclerView.Adapter<TraineeListAdapter.
             else{
                 holder.traineeSyncedView.setChecked(false);
             }
+            if(current.getIsAnswered()==1){
+                holder.traineeLinearLayout.setBackgroundColor(Color.parseColor("#B8FAA6"));
+            }
+            else{
+                holder.traineeLinearLayout.setBackgroundColor(0x00000000);
+            }
         } else {
             // Covers the case of data not being ready yet.
             holder.traineeItemView.setText("No Word");
             holder.traineeDateTime.setText("No Word");
             holder.traineeSyncedView.setChecked(false);
+            Linkify.addLinks(holder.traineeItemView,Linkify.ALL);
 
         }
     }

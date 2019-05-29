@@ -23,6 +23,9 @@ public interface TraineeDao {
     @Query("UPDATE trainee_table SET is_synced = 1 WHERE (trainee_number = :traineeNumber)")
     void updateSyncStatus(String traineeNumber);
 
+    @Query("UPDATE trainee_table SET is_answered = 1 WHERE (trainee_number = :traineeNumber)")
+    void updateAnsweredStatus(String traineeNumber);
+
     @Query("DELETE FROM trainee_table")
     void deleteAll();
 
